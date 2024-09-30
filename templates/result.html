@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Results</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="../static/favicon/favicon.svg">
+    <style>
+      body {
+        background: linear-gradient(to right, #e6f3ff, #e6fff3);
+      }
+
+      .search-results,
+      .image-gallery {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #6c757d #e9ecef;
+      }
+
+      .search-results::-webkit-scrollbar,
+      .image-gallery::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .search-results::-webkit-scrollbar-track,
+      .image-gallery::-webkit-scrollbar-track {
+        background: #e9ecef;
+      }
+
+      .search-results::-webkit-scrollbar-thumb,
+      .image-gallery::-webkit-scrollbar-thumb {
+        background-color: #6c757d;
+        border-radius: 20px;
+        border: 3px solid #e9ecef;
+      }
+
+      .result-card {
+        display: inline-block;
+        width: 250px;
+        vertical-align: top;
+        white-space: normal;
+      }
+
+      .favicon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+      }
+
+      .source-title {
+        font-size: 16px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .source-text {
+        font-size: 14px;
+        color: #6c757d;
+        height: 48px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .image-item {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .more-images {
+        width: 100px;
+        height: 100px;
+        background-color: #6c757d;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border-radius: 8px;
+      }
+
+      .ai-response {
+        background: linear-gradient(to bottom, #ffffff, #fff9e6);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">Search Results</h1>
+
+      <!-- Sources with favicons and limited text -->
+      {% if sources %}
+      <div class="search-results mb-3 pb-2">
+        <h5>Sources:</h5>
+        <div class="d-inline-flex">
+          {% for source in sources %}
+          <div class="result-card card me-3">
+            <div class="card-body">
+              <h5 class="source-title">
+                <img
+                  src="{{ source.favicon }}"
+                  alt="Source favicon"
+                  class="favicon"
+                />
+                <a href="{{ source.url }}" target="_blank"
+                  >{{ source.title }}</a
+                >
+              </h5>
+              <p class="source-text">
+                {{ source.snippet or 'No description available' }}
+              </p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Unsplash Images -->
+      {% if images %}
+      <div class="image-gallery mb-3 pb-2">
+        <h5>Related Images:</h5>
+        <div class="d-inline-flex">
+          {% for image in images %}
+          <img src="{{ image }}" alt="Related Image" class="image-item me-3" />
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- AI Response Section -->
+      {% if response %}
+      <div class="ai-response">
+        <h2>Generated Response</h2>
+        <p>{{ response | safe }}</p>
+      </div>
+      <p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary mt-3"
+          >Back to Search</a
+        >
+      </p>
+      {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const scrollContainers = document.querySelectorAll(
+          ".search-results, .image-gallery"
+        );
+
+        scrollContainers.forEach((scrollContainer) => {
+          let isDown = false;
+          let startX;
+          let scrollLeft;
+
+          scrollContainer.addEventListener("mousedown", (e) => {
+            isDown = true;
+            scrollContainer.style.cursor = "grabbing";
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+          });
+
+          scrollContainer.addEventListener("mouseleave", () => {
+            isDown = false;
+            scrollContainer.style.cursor = "grab";
+          });
+
+          scrollContainer.addEventListener("mouseup", () => {
+            isDown = false;
+            scrollContainer.style.cursor = "grab";
+          });
+
+          scrollContainer.addEventListener("mousemove", (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            scrollContainer.scrollLeft = scrollLeft - walk;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

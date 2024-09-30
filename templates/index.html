@@ -1,0 +1,203 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Search GPT</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {
+        height: 100%;
+        overflow: hidden;
+      }
+      .gradient-bg {
+        background: linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #e6f3ff 50%,
+          #f3e6ff 100%
+        );
+      }
+      .btn-custom {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+      #globe-container {
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 300px;
+        z-index: 0;
+      }
+      .content {
+        position: relative;
+        z-index: 1;
+      }
+      /* Input group customization */
+      .input-group {
+        max-width: 3000px; /* Adjust width for the input group */
+        margin: 0 auto;
+        border-radius: 30px;
+        overflow: hidden;
+        height: 70px; /* Increase height */
+      }
+
+      .form-control,
+      .form-select,
+      .btn {
+        font-size: 1.2rem; /* Adjust font size for all elements */
+        height: 70px; /* Match height for consistency */
+        border-radius: 0;
+      }
+
+      .form-control {
+        border-right: none;
+      }
+
+      /* Adjust the width of the select dropdown */
+      .form-select {
+        width: 200px; /* Set a fixed width for the select dropdown */
+        border-left: none;
+        border-right: none;
+      }
+
+      #search-input {
+        border-radius: 30px 0 0 30px;
+      }
+
+      #search-button {
+        border-radius: 0 30px 30px 0;
+        height: 70px; /* Match button height */
+      }
+    </style>
+  </head>
+  <body class="gradient-bg">
+    <div class="container-fluid h-100">
+      <div class="row h-100">
+        <div class="col-12">
+          <div id="globe-container"></div>
+          <div
+            class="content text-center position-absolute top-50 start-50 translate-middle w-100"
+          >
+            <h1 class="display-4 mb-4">Open Search GPT</h1>
+            <form
+              method="POST"
+              action="/"
+              class="d-flex justify-content-center"
+            >
+              <div class="input-group input-group-lg w-75">
+                <input
+                  type="text"
+                  id="search-input"
+                  name="question"
+                  class="form-control"
+                  placeholder="What are you looking for?"
+                  required
+                />
+
+                <select name="response_type" class="form-select" required>
+                  <option value="" disabled selected>
+                    Select response type
+                  </option>
+                  <option value="simple">Simple</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="complex">Complex</option>
+                </select>
+                <button id="search-button" class="btn btn-dark">➤</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if response %}
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12">
+          <div class="response-section bg-white p-4 rounded shadow">
+            <h2 class="mb-3">Generated Response</h2>
+            <p>{{ response | safe }}</p>
+          </div>
+        </div>
+      </div>
+      {% if sources %}
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="sources-section bg-white p-4 rounded shadow">
+            <h2 class="mb-3">Sources:</h2>
+            {% for source in sources %}
+            <div class="source-card d-flex align-items-center mb-2">
+              <img
+                src="{{ source.favicon }}"
+                alt="{{ source.title }} favicon"
+                class="me-2"
+              />
+              <a href="{{ source.url }}" target="_blank">{{ source.title }}</a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %} {% if images %}
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="images-section bg-white p-4 rounded shadow">
+            <h2 class="mb-3">Related Images:</h2>
+            <div class="image-gallery d-flex overflow-auto">
+              {% for image in images %}
+              <img src="{{ image }}" alt="Related Image" class="me-2 rounded" />
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Three.js Globe
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      renderer.setSize(300, 300);
+      document
+        .getElementById("globe-container")
+        .appendChild(renderer.domElement);
+
+      const geometry = new THREE.SphereGeometry(1, 32, 32);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.3
+      });
+      const globe = new THREE.Mesh(geometry, material);
+      scene.add(globe);
+
+      camera.position.z = 2;
+
+      function animate() {
+        requestAnimationFrame(animate);
+        globe.rotation.x += 0.001;
+        globe.rotation.y += 0.001;
+        renderer.render(scene, camera);
+      }
+      animate();
+    </script>
+  </body>
+</html>
